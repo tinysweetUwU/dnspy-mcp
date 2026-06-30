@@ -290,6 +290,12 @@ namespace dnSpy.MCP.Mcp
 
                 await WriteJsonResponseAsync(stream, 405, new { error = "Method not allowed" });
             }
+            catch (IOException ioEx) when (ioEx.InnerException is System.Net.Sockets.SocketException se
+                && (se.SocketErrorCode == System.Net.Sockets.SocketError.ConnectionReset
+                    || se.SocketErrorCode == System.Net.Sockets.SocketError.ConnectionAborted))
+            {
+                // Client disconnected mid-request (e.g. SSE reconnect) — not an error
+            }
             catch (Exception ex)
             {
                 McpLogger.Error(ex, "Connection handler error");
@@ -441,6 +447,28 @@ namespace dnSpy.MCP.Mcp
 
                     case "ping":
                         results.Add(isNotification ? null : CreateResponse(id, new JsonObject()));
+                        break;
+
+                    // RooCode/Cline call these — return empty lists (we don't expose resources)
+                    case "resources/list":
+                        results.Add(isNotification ? null : CreateResponse(id, new JsonObject
+                        {
+                            ["resources"] = new JsonArray()
+                        }));
+                        break;
+
+                    case "resources/templates/list":
+                        results.Add(isNotification ? null : CreateResponse(id, new JsonObject
+                        {
+                            ["resourceTemplates"] = new JsonArray()
+                        }));
+                        break;
+
+                    case "prompts/list":
+                        results.Add(isNotification ? null : CreateResponse(id, new JsonObject
+                        {
+                            ["prompts"] = new JsonArray()
+                        }));
                         break;
 
                     default:

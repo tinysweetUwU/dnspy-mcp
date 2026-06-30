@@ -2,6 +2,51 @@
   "mcpServers": {
     "dnspy": {
       "url": "http://127.0.0.1:5150/sse"
+    },
+    "IDA Pro": {
+      "transport": "sse",
+      "url": "http://127.0.0.1:13337/sse",
+      "disabledTools": [
+        "server_health"
+      ],
+      "alwaysAllow": [
+        "list_instances",
+        "survey_binary",
+        "find_regex",
+        "lookup_funcs",
+        "list_funcs",
+        "list_globals",
+        "analyze_function",
+        "entity_query",
+        "xrefs_to",
+        "xref_query",
+        "find_bytes",
+        "func_query",
+        "analyze_batch",
+        "find",
+        "analyze_component",
+        "disasm",
+        "get_bytes",
+        "get_string",
+        "insn_query",
+        "func_profile",
+        "py_eval",
+        "callgraph",
+        "basic_blocks",
+        "server_warmup",
+        "imports_query",
+        "trace_data_flow",
+        "decompile",
+        "append_comments",
+        "rename",
+        "set_comments",
+        "int_convert",
+        "export_funcs",
+        "get_int",
+        "get_global_value",
+        "imports"
+      ],
+      "disabled": false
     }
   }
 }
