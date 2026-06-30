@@ -1,0 +1,63 @@
+# Build outputs
+**/bin/
+**/obj/
+build/
+
+# User / IDE
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OMC state
+.omc/
+**/.omc/
+
+# Logs
+*.log
+
+# Archives
+*.zip
+
+# dnSpy source (clone separately if needed for integrated build)
+dnspy-source/
+
+# External DLL dependencies (copy from dnSpy bin to deps/)
+deps/
+
+# Editor
+*~
+
+# Added by code-review-graph
+.code-review-graph/
+
+# Claude Code
+.claude/
+.mcp.json
+
+# Test output
+TestResults/
+
+# Coverage
+coverage/
+*.cobertura.xml
+*.opencover.xml
+
+# Environment / secrets
+.env
+.env.*
+*.env
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+*.cache
+*.db
+
+# NuGet fallback
+*.nupkg
+.nuget/

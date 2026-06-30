@@ -1,0 +1,11 @@
+{
+  "mcpServers": [
+    {
+      "name": "dnspy",
+      "transport": {
+        "type": "sse",
+        "url": "http://127.0.0.1:5150/sse"
+      }
+    }
+  ]
+}

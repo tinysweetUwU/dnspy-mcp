@@ -1,0 +1,127 @@
+using System;
+using System.ComponentModel.Composition;
+using dnSpy.Contracts.App;
+using dnSpy.Contracts.Menus;
+using dnSpy.Contracts.Settings.Dialog;
+using dnSpy.MCP.Mcp;
+using dnSpy.MCP.Settings;
+using MC = dnSpy.Contracts.Menus.MenuConstants;
+
+namespace dnSpy.MCP {
+    static class McpMenuConstants {
+        public const string APP_MENU_MCP = "B91A3E8A-4B1C-4D9E-A2F5-8E6F1A7B9C3D";
+        public const string GROUP_MCP1 = "0,B91A3E8A-4B1C-4D9E-A2F5-8E6F1A7B9C3D";
+    }
+
+    [ExportMenu(OwnerGuid = MC.APP_MENU_GUID, Guid = McpMenuConstants.APP_MENU_MCP, Order = MC.ORDER_APP_MENU_DEBUG + 0.2, Header = "_MCP Server")]
+    sealed class McpMenu : IMenu {
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "_Start", Group = McpMenuConstants.GROUP_MCP1, Order = 0)]
+    sealed class StartMcpCommand : MenuItemBase {
+        public override void Execute(IMenuItemContext context) {
+            var ext = DnSpyContext.Extension;
+            ext?.StartServer();
+        }
+
+        public override bool IsVisible(IMenuItemContext context) {
+            return DnSpyContext.Extension != null;
+        }
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "_Stop", Group = McpMenuConstants.GROUP_MCP1, Order = 5)]
+    sealed class StopMcpCommand : MenuItemBase {
+        public override void Execute(IMenuItemContext context) {
+            DnSpyContext.Extension?.StopServer();
+        }
+
+        public override bool IsVisible(IMenuItemContext context) {
+            return DnSpyContext.Extension != null;
+        }
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "_Status", Group = McpMenuConstants.GROUP_MCP1, Order = 10)]
+    sealed class StatusCommand : MenuItemBase {
+        public override void Execute(IMenuItemContext context) {
+            var ext = DnSpyContext.Extension;
+            if (ext == null) {
+                McpLogger.Warn("Extension not loaded");
+                return;
+            }
+            var running = ext.IsServerRunning ? "Running" : "Stopped";
+            var port = ext.ServerPort;
+            McpLogger.Info($"MCP Server: {running}, Port: {port}");
+            if (ext.IsServerRunning) {
+                McpLogger.Info($"  HTTP (Claude Code/Cursor): http://127.0.0.1:{port}/");
+                McpLogger.Info($"  SSE  (RooCode/Cline):      http://127.0.0.1:{port}/sse");
+                McpLogger.Info($"  Health check:              http://127.0.0.1:{port}/health");
+            }
+        }
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "_Connection Guide", Group = McpMenuConstants.GROUP_MCP1, Order = 15)]
+    sealed class ConnectionGuideCommand : MenuItemBase {
+        public override void Execute(IMenuItemContext context) {
+            var ext = DnSpyContext.Extension;
+            var port = ext?.ServerPort ?? 5150;
+            McpLogger.Info("=== MCP Connection Guide ===");
+            McpLogger.Info("");
+            McpLogger.Info("[RooCode / Cline (VS Code extensions)]");
+            McpLogger.Info("  Add to .vscode/mcp.json or workspace settings:");
+            McpLogger.Info("  {");
+            McpLogger.Info("    \"mcpServers\": {");
+            McpLogger.Info("      \"dnspy\": {");
+            McpLogger.Info($"        \"url\": \"http://127.0.0.1:{port}/sse\"");
+            McpLogger.Info("      }");
+            McpLogger.Info("    }");
+            McpLogger.Info("  }");
+            McpLogger.Info("");
+            McpLogger.Info("[Claude Code]");
+            McpLogger.Info($"  claude mcp add --transport http dnspy http://127.0.0.1:{port}");
+            McpLogger.Info("");
+            McpLogger.Info("[Cursor]");
+            McpLogger.Info("  Add to ~/.cursor/mcp.json:");
+            McpLogger.Info($"  {{ \"mcpServers\": {{ \"dnspy\": {{ \"url\": \"http://127.0.0.1:{port}/\" }} }} }}");
+        }
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "_Show Log", Group = McpMenuConstants.GROUP_MCP1, Order = 20)]
+    sealed class ShowLogCommand : MenuItemBase {
+        public override void Execute(IMenuItemContext context) {
+            McpLogger.Info(McpLogger.GetRecentLogs());
+        }
+
+        public override bool IsVisible(IMenuItemContext context) {
+            return DnSpyContext.Extension != null;
+        }
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "_Clear Log", Group = McpMenuConstants.GROUP_MCP1, Order = 30)]
+    sealed class ClearLogCommand : MenuItemBase {
+        public override void Execute(IMenuItemContext context) {
+            McpLogger.ClearLog();
+            McpLogger.Info("Log cleared");
+        }
+
+        public override bool IsVisible(IMenuItemContext context) {
+            return DnSpyContext.Extension != null;
+        }
+    }
+
+    [ExportMenuItem(OwnerGuid = McpMenuConstants.APP_MENU_MCP, Header = "S_ettings...", Group = McpMenuConstants.GROUP_MCP1, Order = 40)]
+    sealed class SettingsCommand : MenuItemBase {
+        readonly Lazy<IAppSettingsService> appSettingsService;
+
+        [ImportingConstructor]
+        SettingsCommand(Lazy<IAppSettingsService> appSettingsService) =>
+            this.appSettingsService = appSettingsService;
+
+        public override void Execute(IMenuItemContext context) {
+            appSettingsService.Value.Show(McpAppSettingsPage.PAGE_GUID);
+        }
+
+        public override bool IsVisible(IMenuItemContext context) {
+            return DnSpyContext.Extension != null;
+        }
+    }
+}

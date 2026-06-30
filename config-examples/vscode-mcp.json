@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "dnspy": {
+      "url": "http://127.0.0.1:5150/sse",
+      "label": "dnSpy MCP",
+      "description": "dnSpy decompiler and analysis tools"
+    }
+  }
+}
